@@ -31,6 +31,8 @@ type Payment struct {
 
 // given payment items, calculate the payment splits for all payers involved in the items
 func calculateSplitPayments(items []PaymentItem) []SplitPayResult {
+    var payersResultDict SplitPayersDict=make(SplitPayersDict)
+
     var item PaymentItem
     for _,item = range items {
         // total payers of the item, which includes the original payer
@@ -39,6 +41,9 @@ func calculateSplitPayments(items []PaymentItem) []SplitPayResult {
         // the original payer (who has already paid this split payment)
         var splitPayment float=item.OriginalPaymentAmount/float32(totalPayers)
 
+        var payer string
+        for _,payer = range item.SplitPayers {
 
+        }
     }
 }
