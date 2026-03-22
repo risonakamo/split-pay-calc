@@ -2,6 +2,8 @@
 
 package splitpay
 
+import "split-pay-calc/src/utils"
+
 // split pay result keyed by the payer
 type SplitPayersDict map[string]*SplitPayResult
 
@@ -97,4 +99,29 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
         SplitPays: payersResultDict,
         Totals: totals,
     }
+}
+
+// round all relevant float vals in result
+func RoundSplitResult(result SplitPayResultTop) SplitPayResultTop {
+    // round split pays
+    var splitPay *SplitPayResult
+    for _, splitPay = range result.SplitPays {
+        // round total
+        splitPay.Total = utils.ToFixed(splitPay.Total, 2)
+
+        // round each payment
+        var payment *Payment
+        for _, payment = range splitPay.Payments {
+            payment.Amount = utils.ToFixed(payment.Amount, 2)
+        }
+    }
+
+    // round totals dict
+    var payer string
+    var payVal float64
+    for payer,payVal = range result.Totals {
+        result.Totals[payer] = utils.ToFixed(payVal, 2)
+    }
+
+    return result
 }

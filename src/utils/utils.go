@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 
@@ -41,4 +42,15 @@ func WriteYaml(filename string,data any) error {
 
 	wfile.Write(ymldata)
 	return nil
+}
+
+// round to int
+func round(num float64) int {
+    return int(num + math.Copysign(0.5, num))
+}
+
+// round to decimal point
+func ToFixed(num float64, precision int) float64 {
+    output := math.Pow(10, float64(precision))
+    return float64(round(num * output)) / output
 }
