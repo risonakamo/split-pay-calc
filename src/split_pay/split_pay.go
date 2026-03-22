@@ -12,7 +12,7 @@ type PaymentsDict map[string]*Payment
 type PaymentItem struct {
     ItemName string
     OriginalPayer string
-    OriginalPaymentAmount float32
+    OriginalPaymentAmount float64
 
     // list of other payers which this payment should be split with.
     // this should not include the original payer.
@@ -29,7 +29,7 @@ type SplitPayResult struct {
 // a payment to be made to a certain person
 type Payment struct {
     ToPerson string
-    Amount float32
+    Amount float64
 }
 
 // given payment items, calculate the payment splits for all payers involved in the items
@@ -43,7 +43,7 @@ func calculateSplitPayments(items []PaymentItem) SplitPayersDict {
 
         // the split payment of all payers. all split payers must pay this amount to
         // the original payer (who has already paid this split payment)
-        var splitPayment float32=item.OriginalPaymentAmount/float32(totalPayers)
+        var splitPayment float64=item.OriginalPaymentAmount/float64(totalPayers)
 
         var subPayer string
         for _,subPayer = range item.SplitPayers {
