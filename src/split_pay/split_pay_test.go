@@ -46,7 +46,7 @@ func Test_calcSplit(t *testing.T) {
         },
     }
 
-    result := calculateSplitPayments(data)
+    result := CalculateSplitPayments(data)
 
     pp.Println(result)
 }
@@ -69,7 +69,7 @@ func Test_calcSplit2(t *testing.T) {
         },
     }
 
-    result := calculateSplitPayments(data)
+    result := CalculateSplitPayments(data)
 
     pp.Println(result)
 }
