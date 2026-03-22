@@ -21,6 +21,12 @@ type CsvRow struct {
     SharedPayers string `csv:"shared payers"`
 }
 
+// read csv data into items
+func ReadPayCsvToItems(filename string) []PaymentItem {
+    var rows []CsvRow=readPayCsv(filename)
+    return csvDataToSplitPayItems(rows)
+}
+
 // read the split pay csv file
 func readPayCsv(filename string) []CsvRow {
 	var e error

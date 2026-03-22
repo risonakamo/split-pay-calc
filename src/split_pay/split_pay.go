@@ -25,25 +25,25 @@ type PaymentItem struct {
 // payment result for a single person. contains the payments that the person needs
 // to make, and to whom
 type SplitPayResult struct {
-    Payer string
-    Payments PaymentsDict
-    Total float64
+    Payer string `yaml:"payer"`
+    Payments PaymentsDict `yaml:"payments"`
+    Total float64 `yaml:"total"`
 }
 
 // a payment to be made to a certain person
 type Payment struct {
-    ToPerson string
-    Amount float64
+    ToPerson string `yaml:"toPerson"`
+    Amount float64 `yaml:"amount"`
 }
 
 // container for split pays results
 type SplitPayResultTop struct {
-    SplitPays SplitPayersDict
-    Totals TotalsDict
+    SplitPays SplitPayersDict `yaml:"split"`
+    Totals TotalsDict `yaml:"totalOriginalPayments"`
 }
 
 // given payment items, calculate the payment splits for all payers involved in the items
-func calculateSplitPayments(items []PaymentItem) SplitPayResultTop {
+func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
     var payersResultDict SplitPayersDict=SplitPayersDict{}
     var totals TotalsDict=TotalsDict{}
 
