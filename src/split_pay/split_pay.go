@@ -8,6 +8,9 @@ type SplitPayersDict map[string]*SplitPayResult
 // payments keyed by the receiver of the payment
 type PaymentsDict map[string]*Payment
 
+// dict with total payments by original payers
+type TotalsDict map[string]float64
+
 // a payment that occurred that needs to be split
 type PaymentItem struct {
     ItemName string
@@ -24,6 +27,7 @@ type PaymentItem struct {
 type SplitPayResult struct {
     Payer string
     Payments PaymentsDict
+    Total float64
 }
 
 // a payment to be made to a certain person
@@ -32,12 +36,29 @@ type Payment struct {
     Amount float64
 }
 
+// container for split pays results
+type SplitPayResultTop struct {
+    SplitPays SplitPayersDict
+    Totals TotalsDict
+}
+
 // given payment items, calculate the payment splits for all payers involved in the items
-func calculateSplitPayments(items []PaymentItem) SplitPayersDict {
+func calculateSplitPayments(items []PaymentItem) SplitPayResultTop {
     var payersResultDict SplitPayersDict=SplitPayersDict{}
+    var totals TotalsDict=TotalsDict{}
 
     var item PaymentItem
     for _,item = range items {
+        // adding to totals dict
+        var inTotals bool
+        _,inTotals=totals[item.OriginalPayer]
+
+        if !inTotals {
+            totals[item.OriginalPayer]=0
+        }
+
+        totals[item.OriginalPayer]+=item.OriginalPaymentAmount
+
         // total payers of the item, which includes the original payer
         var totalPayers int=len(item.SplitPayers)+1
 
@@ -68,8 +89,12 @@ func calculateSplitPayments(items []PaymentItem) SplitPayersDict {
             }
 
             payersResultDict[subPayer].Payments[item.OriginalPayer].Amount+=splitPayment
+            payersResultDict[subPayer].Total+=splitPayment
         }
     }
 
-    return payersResultDict
+    return SplitPayResultTop{
+        SplitPays: payersResultDict,
+        Totals: totals,
+    }
 }
