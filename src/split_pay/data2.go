@@ -47,3 +47,12 @@ func readPayCsv2(filename string) []CsvRow2 {
 
     return result
 }
+
+func csvRow2ToPayItem(rows []CsvRow2) []PaymentItem {
+    var result []PaymentItem
+
+    var row CsvRow2
+    for _,row = range rows {
+
+    }
+}

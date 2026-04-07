@@ -22,6 +22,10 @@ type PaymentItem struct {
     // list of other payers which this payment should be split with.
     // this should not include the original payer.
     SplitPayers []string
+
+    // shared payers pay directly to the original payer - original payer does
+    // not split with the shared payers
+    DirectPay bool
 }
 
 // payment result for a single person. contains the payments that the person needs
@@ -63,6 +67,11 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
 
         // total payers of the item, which includes the original payer
         var totalPayers int=len(item.SplitPayers)+1
+
+        // remove original payer if direct pay
+        if item.DirectPay {
+            totalPayers-=1
+        }
 
         // the split payment of all payers. all split payers must pay this amount to
         // the original payer (who has already paid this split payment)
