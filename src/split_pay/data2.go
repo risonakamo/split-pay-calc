@@ -2,8 +2,10 @@ package splitpay
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/gocarina/gocsv"
 )
@@ -22,7 +24,7 @@ type CsvRow2 struct {
 }
 
 // read pay csv file v2
-func readPayCsv2(filename string) []CsvRow2 {
+func ReadPayCsv2(filename string) []CsvRow2 {
 	var e error
     var file *os.File
 	file,e=os.Open(filename)
@@ -48,11 +50,40 @@ func readPayCsv2(filename string) []CsvRow2 {
     return result
 }
 
-func csvRow2ToPayItem(rows []CsvRow2) []PaymentItem {
+// convert csv items v2 to payment items
+func CsvRow2ToPayItem(rows []CsvRow2) []PaymentItem {
     var result []PaymentItem
 
     var row CsvRow2
     for _,row = range rows {
+        var origPayer string=normaliseName(row.OrigPayer)
 
+        var splitPayers []string
+        var splitPlayersPreClean []string = strings.Split(row.SharedPayers, ",")
+
+        var splitPayer string
+        for _, splitPayer = range splitPlayersPreClean {
+            var fixedSplitPayer string = normaliseName(splitPayer)
+
+            // ensure original payer is not included
+            if fixedSplitPayer == origPayer {
+                fmt.Println("split payer was the original payer... strange")
+                continue
+            }
+
+            splitPayers = append(splitPayers, fixedSplitPayer)
+        }
+
+        var item PaymentItem = PaymentItem{
+            ItemName:              strings.TrimSpace(row.Description),
+            OriginalPayer:         origPayer,
+            OriginalPaymentAmount: row.AmountUsd,
+            SplitPayers:           splitPayers,
+            DirectPay: row.DirectPay=="yes",
+        }
+
+        result = append(result, item)
     }
+
+    return result
 }

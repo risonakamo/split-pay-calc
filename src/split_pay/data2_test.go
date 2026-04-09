@@ -7,7 +7,9 @@ import (
 )
 
 func Test_dataRead(t *testing.T) {
-    result:=readPayCsv2("C:/Users/ktkm2/Desktop/newprojs/split-pay-calc/data/data2.tsv")
+    result:=ReadPayCsv2("C:/Users/ktkm2/Desktop/newprojs/split-pay-calc/data/data2.tsv")
 
-    pp.Println(result)
+    result2:=CsvRow2ToPayItem(result)
+
+    pp.Println(result2)
 }

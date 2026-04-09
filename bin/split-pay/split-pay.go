@@ -9,9 +9,11 @@ import (
 func main() {
     var here string=utils.GetHereDirExe()
 
-    var dataPath string=filepath.Join(here,"../../data/data.tsv")
+    var dataPath string=filepath.Join(here,"../../data/data2.tsv")
 
-    var payItems []splitpay.PaymentItem=splitpay.ReadPayCsvToItems(dataPath)
+    var payItems []splitpay.PaymentItem=splitpay.CsvRow2ToPayItem(
+        splitpay.ReadPayCsv2(dataPath),
+    )
 
     var result splitpay.SplitPayResultTop=splitpay.CalculateSplitPayments(payItems)
 
