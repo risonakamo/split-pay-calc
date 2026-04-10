@@ -17,6 +17,8 @@ func main() {
 
     var result splitpay.SplitPayResultTop=splitpay.CalculateSplitPayments(payItems)
 
+    result.SplitPays=splitpay.BalanceSplitPay(result.SplitPays)
+
     result=splitpay.RoundSplitResult(result)
 
     utils.WriteYaml(

@@ -2,7 +2,11 @@
 
 package splitpay
 
-import "split-pay-calc/src/utils"
+import (
+	"split-pay-calc/src/utils"
+
+	mapset "github.com/deckarep/golang-set/v2"
+)
 
 // split pay result keyed by the payer
 type SplitPayersDict map[string]*SplitPayResult
@@ -133,4 +137,83 @@ func RoundSplitResult(result SplitPayResultTop) SplitPayResultTop {
     }
 
     return result
+}
+
+// balance split payer dict to come up with simplest payment plan
+func BalanceSplitPay(splitPay SplitPayersDict) SplitPayersDict {
+    var allNames []string=getAllNames(splitPay)
+
+    var name1 string
+    var name2 string
+
+    var in bool
+
+    for _,name1 = range allNames {
+        for _,name2 = range allNames {
+            // extracting amounts for name1 and name2
+            var amount1 float64=0
+            var amount2 float64=0
+
+            _,in=splitPay[name1]
+
+            if in {
+                _,in=splitPay[name1].Payments[name2]
+
+                if in {
+                    amount1=splitPay[name1].Payments[name2].Amount
+                }
+            }
+
+            _,in=splitPay[name2]
+
+            if in {
+                _,in=splitPay[name2].Payments[name1]
+
+                if in {
+                    amount2=splitPay[name2].Payments[name1].Amount
+                }
+            }
+
+            // if either amount is 0, do nothing. nothing to change on either side
+            if amount1==0 || amount2==0 {
+                continue
+            }
+
+            // amount 1 is less than 2. set amount1 to zero and deduct from amount 2
+            if amount1<amount2 {
+                splitPay[name1].Payments[name2].Amount=0
+                splitPay[name1].Total-=amount1
+
+                splitPay[name2].Payments[name1].Amount-=amount1
+                splitPay[name2].Total-=amount1
+
+            // otherwise, do the reverse
+            } else {
+                splitPay[name2].Payments[name1].Amount=0
+                splitPay[name2].Total-=amount2
+
+                splitPay[name1].Payments[name2].Amount-=amount2
+                splitPay[name1].Total-=amount2
+            }
+        }
+    }
+
+    return splitPay
+}
+
+// extract all possible names from split pay dict
+func getAllNames(splitPay SplitPayersDict) []string {
+    var result mapset.Set[string]=mapset.NewSet[string]()
+
+    var name string
+    for name,_ = range splitPay {
+        result.Add(name)
+
+        var name2 string
+        for name2,_ = range splitPay[name].Payments {
+            result.Add(name2)
+        }
+    }
+
+    return result.ToSlice()
 }
