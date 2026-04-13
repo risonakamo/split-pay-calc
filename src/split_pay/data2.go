@@ -21,6 +21,8 @@ type CsvRow2 struct {
 	OrigPayer    string `csv:"original payer"`
 	SharedPayers string `csv:"shared payers"`
 	DirectPay    string `csv:"direct pay"`
+
+    Paid string `csv:"paid"`
 }
 
 // read pay csv file v2
@@ -56,6 +58,10 @@ func CsvRow2ToPayItem(rows []CsvRow2) []PaymentItem {
 
     var row CsvRow2
     for _,row = range rows {
+        if row.Paid=="yes" {
+            continue
+        }
+
         var origPayer string=normaliseName(row.OrigPayer)
 
         var splitPayers []string

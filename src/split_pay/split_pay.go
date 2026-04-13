@@ -35,7 +35,7 @@ type PaymentItem struct {
 // payment result for a single person. contains the payments that the person needs
 // to make, and to whom
 type SplitPayResult struct {
-    Payer string `yaml:"payer"`
+    Payer string `yaml:"-"`
     Payments PaymentsDict `yaml:"payments"`
     Total float64 `yaml:"total"`
 }
@@ -43,7 +43,7 @@ type SplitPayResult struct {
 // a payment to be made to a certain person
 type Payment struct {
     ToPerson string `yaml:"-"`
-    Amount float64 `yaml:"amount"`
+    Amount float64 `yaml:"owedAmount"`
     Itemisation []ItemisedPayItem `yaml:"items"`
 }
 
