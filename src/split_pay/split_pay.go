@@ -42,7 +42,7 @@ type SplitPayResult struct {
 
 // a payment to be made to a certain person
 type Payment struct {
-    ToPerson string `yaml:"toPerson"`
+    ToPerson string `yaml:"-"`
     Amount float64 `yaml:"amount"`
     Itemisation []ItemisedPayItem `yaml:"items"`
 }
@@ -121,7 +121,7 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
 
             if !in {
                 payersResultDict[item.OriginalPayer]=&SplitPayResult{
-                    Payer: subPayer,
+                    Payer: item.OriginalPayer,
                     Payments: PaymentsDict{},
                 }
             }
@@ -148,7 +148,9 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
                 },
             )
 
-            // filling out reverse (just the itemisation)
+            // filling out reverse
+            payersResultDict[item.OriginalPayer].Payments[subPayer].Amount-=splitPayment
+            payersResultDict[item.OriginalPayer].Total-=splitPayment
             payersResultDict[item.OriginalPayer].Payments[subPayer].Itemisation=append(
                 payersResultDict[item.OriginalPayer].Payments[subPayer].Itemisation,
                 ItemisedPayItem{
