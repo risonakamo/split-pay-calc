@@ -44,6 +44,16 @@ type SplitPayResult struct {
 type Payment struct {
     ToPerson string `yaml:"toPerson"`
     Amount float64 `yaml:"amount"`
+    Itemisation []ItemisedPayItem `yaml:"items"`
+}
+
+// shorter form of pay item for itemisation list
+type ItemisedPayItem struct {
+    ItemName string `yaml:"description"`
+
+    // can be negative. represents a payment detracting from the sub-payer
+    // owed amount
+    Amount float64 `yaml:"amount"`
 }
 
 // container for split pays results
@@ -83,6 +93,7 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
 
         var subPayer string
         for _,subPayer = range item.SplitPayers {
+            // dict initialisations
             var payerInResult bool
             _,payerInResult=payersResultDict[subPayer]
 
@@ -94,7 +105,8 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
             }
 
             var origPayerInSubpayerPayments bool
-            _,origPayerInSubpayerPayments=payersResultDict[subPayer].Payments[item.OriginalPayer]
+            _,origPayerInSubpayerPayments=payersResultDict[subPayer].
+                Payments[item.OriginalPayer]
 
             if !origPayerInSubpayerPayments {
                 payersResultDict[subPayer].Payments[item.OriginalPayer]=&Payment{
@@ -103,8 +115,47 @@ func CalculateSplitPayments(items []PaymentItem) SplitPayResultTop {
                 }
             }
 
+            // ensuring the reverse direction exists
+            var in bool
+            _,in=payersResultDict[item.OriginalPayer]
+
+            if !in {
+                payersResultDict[item.OriginalPayer]=&SplitPayResult{
+                    Payer: subPayer,
+                    Payments: PaymentsDict{},
+                }
+            }
+
+            _,in=payersResultDict[item.OriginalPayer].Payments[subPayer]
+
+            if !in {
+                payersResultDict[item.OriginalPayer].Payments[subPayer]=&Payment{
+                    ToPerson: item.OriginalPayer,
+                    Amount: 0,
+                }
+            }
+
+
+
+            // filling out payer->subpayer
             payersResultDict[subPayer].Payments[item.OriginalPayer].Amount+=splitPayment
             payersResultDict[subPayer].Total+=splitPayment
+            payersResultDict[subPayer].Payments[item.OriginalPayer].Itemisation=append(
+                payersResultDict[subPayer].Payments[item.OriginalPayer].Itemisation,
+                ItemisedPayItem{
+                    ItemName: item.ItemName,
+                    Amount: splitPayment,
+                },
+            )
+
+            // filling out reverse (just the itemisation)
+            payersResultDict[item.OriginalPayer].Payments[subPayer].Itemisation=append(
+                payersResultDict[item.OriginalPayer].Payments[subPayer].Itemisation,
+                ItemisedPayItem{
+                    ItemName: item.ItemName,
+                    Amount: -splitPayment,
+                },
+            )
         }
     }
 
